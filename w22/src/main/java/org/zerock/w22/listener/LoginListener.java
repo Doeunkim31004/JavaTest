@@ -10,7 +10,7 @@ import javax.servlet.http.HttpSessionBindingEvent;
 @WebListener
 @Log4j2
 public class LoginListener implements HttpSessionAttributeListener {
-    
+
     @Override
     public void attributeAdded(HttpSessionBindingEvent event){
         String name = event.getName();
