@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5"
       layout:decorate="~{layout/basic.html}">
+
 
 <head>
   <title>Board Read</title>
@@ -43,12 +45,12 @@
             <input type="text" class="form-control" th:value="${#temporals.format(dto.modDate, 'yyyy-MM-dd HH:mm:ss')}" readonly>
           </div>
 
-          <div class="my-4">
+          <div class="my-4" th:with="user=${#authentication.principal}">
             <div class="float-end" th:with="link = ${pageRequestDTO.getLink()}">
               <a th:href="|@{/board/list}?${link}|" class="text-decoration-none">
                 <button type="button" class="btn btn-primary">List</button>
               </a>
-              <a th:href="|@{/board/modify(bno=${dto.bno})}&${link}|" class="text-decoration-none">
+              <a th:if="${user != null && user.username == dto.writer}" th:href="|@{/board/modify(bno=${dto.bno})}&${link}|" class="text-decoration-none">
                 <button type="button" class="btn btn-secondary">Modify</button>
               </a>
             </div>
@@ -57,78 +59,94 @@
 
         </div><!--end card body-->
 
-
-
-      </div><!--end card-->
-    </div><!-- end col-->
-  </div><!-- end row-->
-  <div class="row mt-3">
-    <div class="col-md-12">
-      <div class="my-4 ">
-        <button class="btn btn-info  addReplyBtn">ADD REPLY</button>
-      </div>
-      <ul class="list-group replyList">
-      </ul>
-    </div>
-  </div>
-  <div class="row mt-3">
-    <div class="col">
-      <ul class="pagination replyPaging">
-      </ul>
-    </div>
-  </div>
-  <div class="modal registerModal" tabindex="-1">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Register Reply</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="input-group mb-3">
-            <span class="input-group-text">Reply Text</span>
-            <input type="text" class="form-control replyText" >
+        <div class="col">
+          <div class="card" th:if="${dto.fileNames != null && dto.fileNames.size() > 0}">
+            <img class="card-img-top"
+                 th:each="fileName: ${dto.fileNames}"
+                 th:src="|/view/${fileName}|">
           </div>
-          <div class="input-group mb-3">
-            <span class="input-group-text">Replyer</span>
-            <input type="text" class="form-control replyer" >
-          </div>
+
+        </div><!--end card-->
+      </div><!-- end col-->
+    </div><!-- end row-->
+
+    <div class="row mt-3">
+      <div class="col-md-12">
+        <div class="my-4 ">
+          <button class="btn btn-info  addReplyBtn">ADD REPLY</button>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-primary registerBtn">Register</button>
-          <button type="button" class="btn btn-outline-dark closeRegisterBtn" >Close</button>
-        </div>
+        <ul class="list-group replyList">
+        </ul>
       </div>
     </div>
-  </div>
-  <div class="modal modifyModal" tabindex="-1">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title replyHeader"></h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="input-group mb-3">
-            <span class="input-group-text">Reply Text</span>
-            <input type="text" class="form-control modifyText" >
+    <div class="row mt-3">
+      <div class="col">
+        <ul class="pagination replyPaging">
+        </ul>
+      </div>
+    </div>
+
+
+    <div class="modal registerModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Register Reply</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-info modifyBtn">Modify</button>
-          <button type="button" class="btn btn-danger removeBtn">Remove</button>
-          <button type="button" class="btn btn-outline-dark closeModifyBtn">Close</button>
+          <div class="modal-body">
+            <div class="input-group mb-3">
+              <span class="input-group-text">Reply Text</span>
+              <input type="text" class="form-control replyText" >
+            </div>
+            <div class="input-group mb-3"  th:with="user=${#authentication.principal}">
+              <span class="input-group-text">Replyer</span>
+              <input type="text" class="form-control replyer" th:value="${user.username}"  readonly>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary registerBtn">Register</button>
+            <button type="button" class="btn btn-outline-dark closeRegisterBtn" >Close</button>
+          </div>
         </div>
       </div>
     </div>
-  </div> <!--modifyModal -->
-  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- end regist modal -->
 
-  <script src="/js/reply.js"></script>
-</div>
+    <div class="modal modifyModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title replyHeader"></h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="input-group mb-3">
+              <span class="input-group-text">Reply Text</span>
+              <input type="text" class="form-control modifyText" >
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-info modifyBtn">Modify</button>
+            <button type="button" class="btn btn-danger removeBtn">Remove</button>
+            <button type="button" class="btn btn-outline-dark closeModifyBtn">Close</button>
+          </div>
+        </div>
+      </div>
+    </div> <!--modifyModal -->
+
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script src="/js/reply.js"></script>
+
+  </div>
+</div><!-- layout fragment end -->
 
 
 <script layout:fragment="script" th:inline="javascript">
+
+  const currentUser = [[${#authentication.principal.username}]]
 
   const bno = [[${dto.bno}]]
 
@@ -172,6 +190,7 @@
     replyPaging.innerHTML = pageStr
   }
 
+
   function printReplies(page,size,goLast){
 
     getList({bno, page,size, goLast}).then(
@@ -194,6 +213,7 @@
   const replyText = document.querySelector(".replyText")
   const replyer = document.querySelector(".replyer")
   const closeRegisterBtn = document.querySelector(".closeRegisterBtn")
+
 
   document.querySelector(".addReplyBtn").addEventListener("click", function (e){
     registerModal.show()
@@ -221,6 +241,7 @@
   }, false)
 
 
+
   let page = 1
   let size = 10
 
@@ -241,6 +262,7 @@
 
   },false)
 
+
   //modifyModal
   const modifyModal = new bootstrap.Modal(document.querySelector(".modifyModal"))
 
@@ -249,6 +271,10 @@
   const modifyBtn = document.querySelector(".modifyBtn")
   const removeBtn = document.querySelector(".removeBtn")
   const closeModifyBtn = document.querySelector(".closeModifyBtn")
+
+
+  let hasAuth = false // 댓글의 작성자와 currentUser의 일치 여부
+
 
   replyList.addEventListener("click", function (e){
 
@@ -274,11 +300,21 @@
       modifyText.value = reply.replyText
       modifyModal.show()
 
+      hasAuth = currentUser === reply.replyer //댓글의 작성자와 현재 사용자 일치 여부 확인
+
     }).catch(e => alert('error'))
 
   },false)
 
+
   modifyBtn.addEventListener("click", function(e) {
+
+    if(!hasAuth){
+      alert("댓글 작성자만 수정이 가능합니다.")
+      modifyModal.hide()
+      return
+    }
+
 
     const replyObj = {
       bno:bno,
@@ -304,6 +340,13 @@
 
   removeBtn.addEventListener("click", function(e) {
 
+    if(!hasAuth){
+      alert("댓글 작성자만 삭제가 가능합니다.")
+      modifyModal.hide()
+      return
+    }
+
+
     removeReply(replyHeader.innerHTML).then(result => {
 
       alert(result.rno +' 댓글이 삭제되었습니다.')
@@ -318,5 +361,7 @@
       console.log(e)
     })
   },false)
+
+
 
 </script>
